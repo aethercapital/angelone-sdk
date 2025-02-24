@@ -1,12 +1,13 @@
 package com.aether.contracts;
 
+import com.aether.types.Profile;
+
 public interface UserAPI {
 
-//    void login(String username, String password, String otp, String corrID);
 
     void logout();
 
-    void getProfile();
+    Profile getProfile();
 
     void getFundsAndMargin();
 }

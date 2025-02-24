@@ -51,7 +51,31 @@ public class RequestHandler {
     }
 
 
-    public static JsonNode handleAny(Map<String, String> requestBody) throws IOException {
+    public static JsonNode handleAnyGET(Map<String, String> requestBody) throws IOException {
+
+        Request request = new Request.Builder()
+                .url(basePath + RestPaths.PROFILE.getPath())
+                .addHeader("Content-Type", type)
+                .addHeader("Accept", type)
+                .addHeader("Authorization", "Bearer "+requestBody.get("jwt_token"))
+                .addHeader("X-UserType", "USER")
+                .addHeader("X-SourceID", "WEB")
+                .addHeader("X-ClientLocalIP", "CLIENT_LOCAL_IP")
+                .addHeader("X-ClientPublicIP", "CLIENT_PUBLIC_IP")
+                .addHeader("X-MACAddress", "MAC_ADDRESS")
+                .addHeader("X-PrivateKey", requestBody.get("api_key"))
+                .build();
+
+        Response response = client.newCall(request).execute();
+
+        if(response.body() == null){
+            throw new ResponseFailure("Response Body is Null");
+        }
+
+        return objectMapper.readTree(response.body().string());
+    }
+
+    public static JsonNode handleAnyPOST(Map<String, String> requestBody) throws IOException {
         String jsonRequestBody = objectMapper.writeValueAsString(requestBody);
         RequestBody body = RequestBody.create(jsonRequestBody, mediaType);
 
@@ -76,4 +100,6 @@ public class RequestHandler {
         }
         return objectMapper.readTree(response.body().string());
     }
+
+
 }

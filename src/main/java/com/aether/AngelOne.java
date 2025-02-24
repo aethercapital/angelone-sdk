@@ -3,9 +3,9 @@ package com.aether;
 import com.aether.contracts.UserAPI;
 import com.aether.exception.AuthenticationFailure;
 import com.aether.types.AuthTokens;
+import com.aether.types.Profile;
 import com.aether.uility.RequestHandler;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -41,6 +41,34 @@ public class AngelOne implements UserAPI {
         } catch (IOException e) {
             throw new AuthenticationFailure(e.getMessage());
         }
+    }
+
+    @Override
+    public void logout() {
+
+    }
+
+    @Override
+    public Profile getProfile() {
+        Map<String, String> requestData = new HashMap<>();
+        requestData.put("api_key", apiKey);
+        requestData.put("jwt_token", authTokens.getJwtToken());
+        try {
+            JsonNode node = RequestHandler.handleAnyGET(requestData);
+            Profile profile = new Profile();
+            profile.setEmail(node.get("data").get("email").textValue());
+            profile.setName(node.get("data").get("name").textValue());
+            profile.setClientCode(node.get("data").get("clientcode").textValue());
+            profile.setMobileNo(node.get("data").get("mobileno").textValue());
+            return profile;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void getFundsAndMargin() {
+
     }
 
     static class SmartAPI {
@@ -85,21 +113,6 @@ public class AngelOne implements UserAPI {
             this.state = state;
             return this;
         }
-
-    }
-
-    @Override
-    public void logout() {
-
-    }
-
-    @Override
-    public void getProfile() {
-
-    }
-
-    @Override
-    public void getFundsAndMargin() {
 
     }
 
