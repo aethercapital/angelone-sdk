@@ -17,5 +17,7 @@ public class SDKExample {
 
         AngelOne angelOne = new AngelOne.SmartAPI().username(username).password(password).otp(otp).apiKey(apiKey).state("abide").login();
         System.out.println(angelOne.getProfile());
+        System.out.println(angelOne.getFundsAndMargin());
+
     }
 }

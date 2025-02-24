@@ -4,7 +4,9 @@ import com.aether.contracts.UserAPI;
 import com.aether.exception.AuthenticationFailure;
 import com.aether.types.AuthTokens;
 import com.aether.types.Profile;
+import com.aether.types.RMSLimit;
 import com.aether.uility.RequestHandler;
+import com.aether.uility.RestPaths;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.io.IOException;
@@ -26,7 +28,6 @@ public class AngelOne implements UserAPI {
     private String clientCode;
 
     private AngelOne(String username, String password, String otp, String state, String apiKey) {
-
         Map<String, String> requestData = new HashMap<>();
         requestData.put("clientcode", username);
         requestData.put("password", password);
@@ -50,24 +51,47 @@ public class AngelOne implements UserAPI {
 
     @Override
     public Profile getProfile() {
-        Map<String, String> requestData = new HashMap<>();
-        requestData.put("api_key", apiKey);
-        requestData.put("jwt_token", authTokens.getJwtToken());
         try {
-            JsonNode node = RequestHandler.handleAnyGET(requestData);
+            JsonNode node = RequestHandler.handleAnyGET(apiKey, authTokens.getJwtToken(), RestPaths.PROFILE.getPath());
             Profile profile = new Profile();
-            profile.setEmail(node.get("data").get("email").textValue());
-            profile.setName(node.get("data").get("name").textValue());
-            profile.setClientCode(node.get("data").get("clientcode").textValue());
-            profile.setMobileNo(node.get("data").get("mobileno").textValue());
+            profile.setEmail(extractValue(node,"email"));
+            profile.setName(extractValue(node,"name"));
+            profile.setClientCode(extractValue(node,"clientcode"));
+            profile.setMobileNo(extractValue(node,"mobileno"));
             return profile;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    private String extractValue(JsonNode node, String field){
+        return node.get("data").get(field).textValue();
+    }
+
     @Override
-    public void getFundsAndMargin() {
+    public RMSLimit getFundsAndMargin() {
+
+        try {
+            JsonNode node = RequestHandler.handleAnyGET(apiKey, authTokens.getJwtToken(), RestPaths.FUNDS_MARGIN.getPath());
+            RMSLimit rmsLimit = new RMSLimit();
+            rmsLimit.setNet(extractValue(node,"net"));
+            rmsLimit.setAvailablecash(extractValue(node,"availablecash"));
+            rmsLimit.setAvailableintradaypayin(extractValue(node,"availableintradaypayin"));
+            rmsLimit.setAvailablelimitmargin(extractValue(node,"availablelimitmargin"));
+            rmsLimit.setCollateral(extractValue(node,"collateral"));
+            rmsLimit.setM2munrealized(extractValue(node,"m2munrealized"));
+            rmsLimit.setM2mrealized(extractValue(node,"m2mrealized"));
+            rmsLimit.setUtiliseddebits(extractValue(node,"utiliseddebits"));
+            rmsLimit.setUtilisedspan(extractValue(node,"utilisedspan"));
+            rmsLimit.setUtilisedoptionpremium(extractValue(node,"utilisedoptionpremium"));
+            rmsLimit.setUtilisedholdingsales(extractValue(node,"utilisedholdingsales"));
+            rmsLimit.setUtilisedexposure(extractValue(node,"utilisedexposure"));
+            rmsLimit.setUtilisedturnover(extractValue(node,"utilisedturnover"));
+            rmsLimit.setUtilisedpayout(extractValue(node,"utilisedpayout"));
+            return rmsLimit;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
