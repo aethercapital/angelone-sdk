@@ -1,18 +1,21 @@
 package com.aether;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import org.jboss.aerogear.security.otp.Totp;
 
 public class SDKExample {
 
     public static void main(String[] args) {
         Dotenv dotenv = Dotenv.load();
-
-        // Get values from .env
         String apiKey = dotenv.get("API_KEY");
         String username = dotenv.get("CLIENT_CODE");
         String password = dotenv.get("PASSWORD");
+        String totp_code = dotenv.get("TOTP");
 
-        System.out.println(apiKey + username + password);
-//        System.out.println(angelOne.toString());
+        Totp totp = new Totp(totp_code);
+        String otp = totp.now();
+
+        AngelOne angelOne = new AngelOne.SmartAPI().username(username).password(password).otp(otp).apiKey(apiKey).state("abide").login();
+        System.out.println(angelOne.toString());
     }
 }
